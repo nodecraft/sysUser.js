@@ -1,4 +1,23 @@
-sysUser.js
-==========
+Installation
+=============
+    npm install sysuser
 
-Simple node.js wrapper for adding and removing users for unix based systems.
+What does it do?
+=============
+
+sysUser is a simple wrapper for unix commands such as useradd, userdel, & usermod to make changes to system users. In order for this to work the calling program MUST be running as root or have permissions to the user commands in command line. This NPM module is still in early development and has only been tested on the listed operating systems:
+
+ - CentOS 6
+
+Coding Examples
+=============
+    var sysUser = require('sysuser')();
+
+    // create user
+    sysUser.add('appUser',['-d','/home/custom/HomeDir'],function(err,uid){
+    	if(err){
+    		console.log('ERROR',err);
+    	}else{
+    		console.log('removed');
+    	}
+    });
