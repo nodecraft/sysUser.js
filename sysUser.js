@@ -6,7 +6,7 @@ module.exports = function(){
 		Thanks to Pablo Castellazzi via stackoverflow for the regex
 		http://stackoverflow.com/questions/6949667/what-are-the-real-rules-for-linux-usernames-on-centos-6-and-rhel-6
 	*/
-	var validUsernameRegex: /^([a-z_][a-z0-9_]{0,30})$/;
+	var validUsernameRegex = /^([a-z_][a-z0-9_]{0,30})$/;
 
 	var buildFlags = function(flags){
 		if(typeof flags == "object"){
