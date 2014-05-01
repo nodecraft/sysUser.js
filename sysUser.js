@@ -119,7 +119,7 @@ module.exports = function(){
 			});
 		},
 		addToGroup: function(username,group,callback){
-			exec('usermod -G '+String(group)+' '+String(username),function(error,stdout,stderr){
+			exec('usermod -a -G '+String(group)+' '+String(username),function(error,stdout,stderr){
 				if(error){
 					callback(stderr);
 				}else{
