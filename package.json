@@ -2,7 +2,7 @@
 	"name":"sysuser",
 	"description": "Simple wrapper for adding and removing users for unix based systems. Only tested on CentOS 6.",
 	"author": "NodeCraft Hosting LLC <admin@getnodecraft.net> (http://getnodecraft.net)",
-	"version":"1.0.1",
+	"version":"1.0.2",
 	"main": "sysUser.js",
 	"repository": {
 	  "type": "git",

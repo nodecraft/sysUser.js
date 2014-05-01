@@ -41,7 +41,7 @@ module.exports = function(){
 				callback('Invalid username given');
 			}
 		},
-		getPID: function(username,callback){
+		getUID: function(username,callback){
 			if(this.validate(username)){
 				exec('id -u '+String(username),function(error,stdout,stderr){
 					if(error){
