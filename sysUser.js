@@ -6,10 +6,7 @@ module.exports = function(){
 		Thanks to Pablo Castellazzi via stackoverflow for the regex
 		http://stackoverflow.com/questions/6949667/what-are-the-real-rules-for-linux-usernames-on-centos-6-and-rhel-6
 	*/
-	var regex = {
-		valid: /^([a-z_][a-z0-9_]{0,30})$/,
-		exists: /no such user/g
-	};
+	var validUsernameRegex: /^([a-z_][a-z0-9_]{0,30})$/;
 
 	var buildFlags = function(flags){
 		if(typeof flags == "object"){
@@ -29,7 +26,7 @@ module.exports = function(){
 
 	return {
 		validate: function(username){
-			return regex['valid'].test(username);
+			return validUsernameRegex.test(username);
 		},
 		checkExists: function(username,callback){
 			if(this.validate(username)){
@@ -58,6 +55,11 @@ module.exports = function(){
 			}
 		},
 		add: function(username,flags,callback){
+			if(callback == undefined){
+				callback = flags;
+				flags = '';
+			}
+			username = String(username); // just to do some basic sanitization
 			this.checkExists(username,function(err,exists){
 				if(err){
 					callback(err);
@@ -65,13 +67,13 @@ module.exports = function(){
 					if(exists === true){
 						callback('User already exists');
 					}else{
-						var cmd = 'adduser '+String(username)+buildFlags(flags);
+						var cmd = 'adduser '+username+buildFlags(flags);
 						console.log('CMD',cmd);
 						exec(cmd,function(error,stdout,stderr){
 							if(error){
 								callback(stderr);
 							}else{
-								exec('id -u '+String(username),function(error,stdout,stderr){
+								exec('id -u '+username,function(error,stdout,stderr){
 									if(error){
 										callback(stderr);
 									}else{
@@ -85,6 +87,10 @@ module.exports = function(){
 			});
 		},
 		delete: function(username,flags,callback){
+			if(callback == undefined){
+				callback = flags;
+				flags = '';
+			}
 			this.checkExists(username,function(err,exists){
 				if(err){
 					callback(err);
@@ -102,7 +108,8 @@ module.exports = function(){
 					}
 				}
 			});
-		},setGroup: function(username,group,callback){
+		},
+		setGroup: function(username,group,callback){
 			exec('usermod -g '+String(group)+' '+String(username),function(error,stdout,stderr){
 				if(error){
 					callback(stderr);
@@ -110,7 +117,8 @@ module.exports = function(){
 					callback();
 				}
 			});
-		},addToGroup: function(username,group,callback){
+		},
+		addToGroup: function(username,group,callback){
 			exec('usermod -G '+String(group)+' '+String(username),function(error,stdout,stderr){
 				if(error){
 					callback(stderr);
