@@ -11,6 +11,7 @@ sysUser is a simple wrapper for unix commands such as useradd, userdel, & usermo
 
 Coding Examples
 =============
+```javascript
     var sysUser = require('sysuser')();
 
     // create user
@@ -21,3 +22,4 @@ Coding Examples
     		console.log('removed');
     	}
     });
+```
