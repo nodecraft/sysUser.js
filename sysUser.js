@@ -28,103 +28,87 @@ module.exports = function(){
 		validate: function(username){
 			return validUsernameRegex.test(username);
 		},
-		checkExists: function(username,callback){
-			if(this.validate(username)){
-				exec('id -u '+String(username),function(error,stdout,stderr){
-					if(error){
-						callback(null, false);
-					}else{
-						callback(null, true);
-					}
-				});
-			}else{
-				callback('Invalid username given');
+		checkExists: function(username, callback){
+			if(!this.validate(username)){
+				return callback('Invalid username given');
 			}
+			exec('id -u "' + String(username).trim() + '"', function(error, stdout, stderr){
+				if(error){
+					return callback(false);
+				}
+				return callback(true);
+			});
 		},
-		getUID: function(username,callback){
-			if(this.validate(username)){
-				exec('id -u '+String(username),function(error,stdout,stderr){
-					if(error){
-						callback('User does not exist');
-					}else{
-						callback(null, stdout);
-					}
-				});
-			}else{
-				callback('Invalid username given');
+		getUID: function(username, callback){
+			if(!this.validate(username)){
+				return callback('Invalid username given');
 			}
+			exec('id -u "' + String(username).trim() + '"', function(error, stdout, stderr){
+				if(error){
+					return callback('User does not exist');
+				}
+				return callback(null, parseInt(stdout));
+			});
 		},
-		add: function(username,flags,callback){
+		add: function(username, flags, callback){
+			if(!callback){
+				callback = flags;
+				flags = '';
+			}
+			var sysUser = this;
+			sysUser.checkExists(String(username).trim(), function(exists){
+				if(exists){
+					return callback('User already exists');
+				}
+				exec('adduser "' + username + '"' + buildFlags(flags), function(error, stdout, stderr){
+					if(error){
+						return callback(stderr);
+					}
+					return sysUser.getUID(username, callback);
+				});
+			});
+		},
+		delete: function(username, flags, callback){
 			if(callback == undefined){
 				callback = flags;
 				flags = '';
 			}
-			username = String(username); // just to do some basic sanitization
-			this.checkExists(username,function(err,exists){
-				if(err){
-					callback(err);
-				}else{
-					if(exists === true){
-						callback('User already exists');
-					}else{
-						var cmd = 'adduser '+username+buildFlags(flags);
-						console.log('CMD',cmd);
-						exec(cmd,function(error,stdout,stderr){
-							if(error){
-								callback(stderr);
-							}else{
-								exec('id -u '+username,function(error,stdout,stderr){
-									if(error){
-										callback(stderr);
-									}else{
-										callback(null,stdout);
-									}
-								});
-							}
-						});
+			this.checkExists(String(username).trim(), function(exists){
+				if(!exists){
+					return callback('User does not exist');
+				}
+				exec('userdel "' + String(username).trim() + '"' + buildFlags(flags), function(error, stdout, stderr){
+					if(error){
+						return callback(stderr);
 					}
-				}
+					return callback(null);
+				});
 			});
 		},
-		delete: function(username,flags,callback){
-			if(callback == undefined){
-				callback = flags;
-				flags = '';
-			}
-			this.checkExists(username,function(err,exists){
-				if(err){
-					callback(err);
-				}else{
-					if(exists === true){
-						exec('userdel '+String(username)+buildFlags(flags),function(error,stdout,stderr){
-							if(error){
-								callback(stderr);
-							}else{
-								callback(null);
-							}
-						});
-					}else{
-						callback('User does not exist');
+		setGroup: function(username, group, callback){
+			this.checkExists(username, function(exists){
+				if(!exists){
+					return callback('User does not exist');
+				}
+				exec('usermod -g "' + String(group) + '" "' + String(username) + '"', function(error, stdout, stderr){
+					if(error){
+						return callback(stderr);
 					}
-				}
+					return callback();
+				});
 			});
 		},
-		setGroup: function(username,group,callback){
-			exec('usermod -g '+String(group)+' '+String(username),function(error,stdout,stderr){
-				if(error){
-					callback(stderr);
-				}else{
-					callback();
+		addToGroup: function(username, group, callback){
+			this.checkExists(username, function(exists){
+				if(!exists){
+					return callback('User does not exist');
 				}
-			});
-		},
-		addToGroup: function(username,group,callback){
-			exec('usermod -a -G '+String(group)+' '+String(username),function(error,stdout,stderr){
-				if(error){
-					callback(stderr);
-				}else{
-					callback();
-				}
+				exec('usermod -a -G "' + String(group) + '" "' + String(username) + '"', function(error, stdout, stderr){
+					if(stderr){
+						return callback(stderr);
+					}
+					return callback();
+				});
 			});
 		}
 	}
